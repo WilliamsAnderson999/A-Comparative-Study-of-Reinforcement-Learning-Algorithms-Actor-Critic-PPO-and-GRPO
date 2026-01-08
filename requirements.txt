@@ -1,0 +1,7 @@
+torch>=2.0.0
+gymnasium[all]>=0.29.1  # For CartPole-v1, LunarLander-v2
+numpy
+matplotlib
+wandb  # Optional logging
+tqdm
+transformers  # For PPO LM example
