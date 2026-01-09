@@ -6,14 +6,6 @@ from src.common.utils import compute_gae
 from typing import Tuple, List
 
 class ActorCritic(nn.Module):
-    """
-    Improved Actor-Critic implementation.
-    - Shared network backbone.
-    - Uses GAE for advantages (Schulman et al., 2015).
-    - Entropy bonus for exploration.
-    - Gradient clipping for stability.
-    - Citation: @konda2000actor
-    """
     def __init__(self, state_dim: int, action_dim: int, hidden: int = 128, lr: float = 3e-4):
         super().__init__()
         self.shared = nn.Sequential(
