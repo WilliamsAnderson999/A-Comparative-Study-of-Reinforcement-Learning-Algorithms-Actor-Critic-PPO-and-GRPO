@@ -10,9 +10,8 @@ class PPO(nn.Module):
     """
     Proximal Policy Optimization for RL environments.
     - Actor and Critic networks.
-    - Clipped surrogate loss (Schulman et al., 2017).
+    - Clipped surrogate loss.
     - GAE advantages.
-    - Citation: @schulman2017proximal
     """
     def __init__(self, state_dim: int, action_dim: int, hidden: int = 64, lr: float = 3e-4, use_amp: bool = True):
         super().__init__()
