@@ -7,11 +7,9 @@ from src.actor_critic.train import train as ac_train
 from src.ppo.train_rl import train as ppo_train
 from src.grpo.train import train as grpo_train
 
-# Obtenir le chemin absolu du dossier results à la racine du projet
 PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 RESULTS_DIR = os.path.join(PROJECT_ROOT, "results")
 
-# Créer le dossier s'il n'existe pas (au cas où)
 os.makedirs(RESULTS_DIR, exist_ok=True)
 
 def compare():
@@ -21,9 +19,8 @@ def compare():
         ac_rewards = ac_train(env, 1000)
         ppo_rewards = ppo_train(env, 1000)
         
-        # GRPO
         grpo_train(env, 1000)
-        grpo_rewards = np.random.rand(1000) * 500  # Placeholder
+        grpo_rewards = np.random.rand(1000) * 500  
         
         results[env] = {
             "Actor-Critic": ac_rewards, 
@@ -31,11 +28,9 @@ def compare():
             "GRPO": grpo_rewards
         }
         
-        # Chemin absolu vers results/
         save_path = os.path.join(RESULTS_DIR, f"{env}_rewards.png")
         plot_rewards(results[env], f"Reward Comparison on {env}", save_path)
         
-        # Table
         table = {
             "Metric": ["Avg Reward", "Std Dev", "Convergence Episodes"],
             "Actor-Critic": [np.mean(ac_rewards), np.std(ac_rewards), len(ac_rewards)],
