@@ -10,10 +10,6 @@ import wandb
 from src.common.utils import set_seed
 
 class ActorNetwork(nn.Module):
-    """
-    Actor network for GRPO.
-    - Orthogonal init for stability (Engstrom et al., 2020).
-    """
     def __init__(self, state_dim: int, action_dim: int, hidden: int = 64):
         super().__init__()
         self.net = nn.Sequential(
