@@ -8,7 +8,6 @@ import argparse
 def test(env_name: str, episodes: int = 10, render: bool = False, device: str = ("cuda" if torch.cuda.is_available() else "cpu")):
     set_seed()
     env = gym.make(env_name, render_mode="human" if render else None)
-    # Use the environment's spec id (handles version auto-upgrade, e.g., CartPole → CartPole-v1)
     env_id = env.spec.id if env.spec else env_name
     state_dim = env.observation_space.shape[0]
     action_dim = env.action_space.n
