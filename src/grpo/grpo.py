@@ -32,12 +32,6 @@ class ActorNetwork(nn.Module):
         return self.net(x)
 
 class GRPOTrainer:
-    """
-    Generalized Regularized Policy Optimization.
-    - No critic; uses group-relative advantages.
-    - KL regularization + clipping.
-    - Citation: @shao2024deepseekmath
-    """
     def __init__(
         self, env: gym.Env, actor: nn.Module, optimizer: optim.Optimizer,
         clip_ratio: float = 0.2, beta: float = 0.001, gamma: float = 0.99,
