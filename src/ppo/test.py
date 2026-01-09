@@ -1,4 +1,3 @@
-# Combined test for RL and LM
 import gymnasium as gym
 import torch
 from .ppo_rl import PPO
@@ -30,7 +29,6 @@ def test_rl(env_name: str, episodes: int = 10, render: bool = False, device: str
 
 def test_lm(prompt: str = "Hello, world!", max_new: int = 30):
     model = PPOLM()
-    # Try loading a combined checkpoint (model + value_head) first, then fall back to model-only
     try:
         ckpt = torch.load("models/ppo_lm_distilgpt2_full.pt", map_location=model.device)
         model.model.load_state_dict(ckpt['model'])
@@ -43,7 +41,6 @@ def test_lm(prompt: str = "Hello, world!", max_new: int = 30):
         except Exception:
             print("No checkpoint found; using base model")
 
-    # Tokenize with attention mask for reliable behavior
     tok_out = model.tokenizer(prompt, return_tensors='pt', padding=True)
     tok_out = {k: v.to(model.device) for k, v in tok_out.items()}
     sequence, _, _ = model.generate(tok_out, max_new)
