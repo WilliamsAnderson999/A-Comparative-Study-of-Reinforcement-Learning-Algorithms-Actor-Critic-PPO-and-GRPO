@@ -4,24 +4,24 @@ actor_critic_config = {
     "hidden": 256,
     "gamma": 0.99,
     "ent_coef": 0.01,
-    "epochs": 10,  # Reduced for speed
-    "clip_ratio": 0.2,  # Optional for stability
-    "max_steps": 4096,  # Increased for better GPU utilization
+    "epochs": 10,  
+    "clip_ratio": 0.2,  
+    "max_steps": 4096,  
     "episodes": 1000,
 }
 
 ppo_config = {
-    "lr": 2.5e-4,              # Slightly lower LR for stability with small batches
-    "hidden": 128,              # Reduced from 64 → saves VRAM and speeds up
+    "lr": 2.5e-4,              
+    "hidden": 128,              
     "gamma": 0.99,
     "lam": 0.95,
     "clip_ratio": 0.2,
     "ent_coef": 0.02,
-    "epochs": 4,               # Reduced from 10 → big VRAM saver
-    "batch_size": 32,          # Safe on 3050 (was 64)
-    "rollout_steps": 1024,     # Reduced from 2048 → half the memory per update
+    "epochs": 4,               
+    "batch_size": 32,          
+    "rollout_steps": 1024,     
     "episodes": 1500,
-    "use_amp": True,           # Enable Automatic Mixed Precision (huge speedup + memory save)
+    "use_amp": True,           
 }
 
 grpo_config = {
