@@ -12,7 +12,6 @@ class PPOLM:
     - Uses GPT-2.
     - Clipped surrogate with rewards (e.g., length + keywords).
     - Simple advantage (reward - baseline).
-    - Citation: @schulman2017proximal (adapted for LM)
     """
     def __init__(self, model_name: str = 'distilgpt2', lr: float = 1e-5, epsilon: float = 0.2,
                  use_amp: bool = True, temperature: float = 0.9, top_k: int = 50, top_p: float = 0.95,
@@ -50,8 +49,6 @@ class PPOLM:
             attention_mask = None
 
         with torch.no_grad():
-            # Use stochastic sampling with safe defaults; provide reasonable top-k/top-p/temperature
-            # resolve sampling parameters: call-level override -> instance default
             if temperature is None:
                 temperature = self.temperature
             if top_k is None:
@@ -99,7 +96,6 @@ class PPOLM:
             except TypeError:
                 beams = self.model.generate(input_ids, num_beams=5, max_length=input_ids.shape[1] + max_new_tokens, early_stopping=True)
             sequence = beams
-            # recompute generated tokens
             inputs_len = input_ids.shape[1]
 
         # Get hidden states by running full forward pass (so we can compute values)
@@ -117,11 +113,9 @@ class PPOLM:
             hidden_outputs = self.model(sequence, output_hidden_states=True)
 
         hidden_states = hidden_outputs.hidden_states[-1]
-        # compute a value per timestep by averaging token embeddings up to that position
         values = [self.value_head(hidden_states[b, :i+1].mean(0, keepdim=True)).item()
                   for b in range(sequence.shape[0])
                   for i in range(sequence.shape[1])]
-        # values is flattened per batch; reshape into list-of-lists then return only generated portion
         batch_values = []
         seq_len = sequence.shape[1]
         for b in range(sequence.shape[0]):
@@ -131,7 +125,6 @@ class PPOLM:
         return sequence, gathered_lp, [bv[inputs_len:] for bv in batch_values]
 
     def compute_reward(self, text: str) -> float:
-        """Example reward: length + keywords."""
         reward = min(len(text.split()) / 25, 1.0)
         if 'good' in text.lower() or 'great' in text.lower():
             reward += 0.5
@@ -148,7 +141,7 @@ class PPOLM:
         # Rewards and advantages
         texts = [self.tokenizer.decode(seq[inputs.shape[1]:], skip_special_tokens=True) for seq in old_sequences]
         rewards = [self.compute_reward(t) for t in texts]
-        advantages = [r - old_values[-1] for r in rewards]  # Simple baseline: last value
+        advantages = [r - old_values[-1] for r in rewards]  
 
         # New forward
         with autocast(enabled=self.use_amp):
@@ -156,15 +149,12 @@ class PPOLM:
             new_logits = outputs.logits[:, :-1, :]
             new_log_probs = torch.log_softmax(new_logits, dim=-1).gather(2, old_sequences[:, 1:].unsqueeze(-1)).squeeze(-1)
 
-            # Pad old_log_probs to match new_log_probs shape (batch_size, seq_len)
-            # old_log_probs has length = generated tokens; pad with 0.0 at the beginning (input tokens)
             max_seq_len = new_log_probs.shape[1]
             padded_old_lp = []
             for lp_list in old_log_probs:
-                # Pad at the beginning with zeros for input tokens
                 pad_len = max_seq_len - len(lp_list)
                 padded = [0.0] * pad_len + lp_list
-                padded_old_lp.append(padded[:max_seq_len])  # Truncate if needed
+                padded_old_lp.append(padded[:max_seq_len]) 
             old_lp_tensor = torch.tensor(padded_old_lp, dtype=torch.float32, device=self.device)
 
             ratio = torch.exp(new_log_probs - old_lp_tensor)
